@@ -1,0 +1,126 @@
+name: DevSecOps Assets Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+      - 'infra/**'
+
+jobs:
+  build-secure-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: TruffleHog Secret Scan
+        id: trufflehog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ""
+          head: HEAD
+          extra_args: --debug --no-verification
+
+      - name: ☢️ Email Alerte Secret
+        if: failure() && steps.trufflehog.outcome == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "☢️ ALERTE : Secret Détecté (DevSecOps)"
+          to: eliraouisoumia2003@gmail.com
+          from: DevSecOps Bot <soumia@gmail.com>
+          body: "Secret trouvé ! Déploiement annulé."
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: ./app
+          push: true
+          # 👇 NOUVEAU NOM IMAGE
+          tags: ${{ secrets.DOCKER_USERNAME }}/devsecops-assets:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/devsecops-assets:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/devsecops-assets:buildcache,mode=max
+
+      - name: 🔴 Email Échec Build
+        if: failure() && steps.docker_build.outcome == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🔴 ÉCHEC : Build Docker (DevSecOps)"
+          to: eliraouisoumia2003@gmail.com
+          from: DevSecOps Bot <soumia@gmail.com>
+          body: "Le build Docker a échoué."
+
+      - name: Run Trivy scanner
+        id: trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/devsecops-assets:latest'
+          format: 'table'
+          exit-code: '1' 
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+      - name: 🛡️ Email Alerte Trivy
+        if: failure() && steps.trivy.outcome == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🛡️ ALERTE : Faille Critique (DevSecOps)"
+          to: eliraouisoumia2003@gmail.com
+          from: DevSecOps Bot <soumia@gmail.com>
+          body: "Vulnérabilité critique trouvée. Déploiement bloqué."
+
+  deploy:
+    needs: build-secure-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        id: deploy_ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          envs: DOCKER_USERNAME 
+          script: |
+            # 👇 NOUVEAUX NOMS CONTENEURS
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/devsecops-assets:latest
+            sudo docker stop devsecops-app || true
+            sudo docker rm devsecops-app || true
+            sudo docker run -d -p 80:80 --name devsecops-app ${{ secrets.DOCKER_USERNAME }}/devsecops-assets:latest
+
+      - name: 🔴 Email Échec Déploiement
+        if: failure() && steps.deploy_ssh.outcome == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🔴 ÉCHEC : Déploiement (DevSecOps)"
+          to: eliraouisoumia2003@gmail.com
+          from: DevSecOps Bot <eliraouisoumia2003@gmail.com>
+          body: "Impossible de contacter le serveur EC2."
