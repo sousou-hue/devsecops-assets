@@ -19,7 +19,7 @@ jobs:
       - name: Debug - Lister les fichiers
         run: |
           ls -R
-          cat File-Sec.py 
+          
       - name: TruffleHog Secret Scan
         id: trufflehog
         uses: trufflesecurity/trufflehog@main
