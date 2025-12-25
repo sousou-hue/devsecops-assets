@@ -22,7 +22,7 @@ RUN pipx install prowler
 
 
 # 3. Installation de Django 2.2 (pour simuler une vieille appli vulnérable)
-
+# RUN pip install Django==2.2
 
 
 
