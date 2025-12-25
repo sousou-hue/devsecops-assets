@@ -26,6 +26,7 @@ RUN pip install Django==2.2
 
 
 
+
 # 5. Installation des dépendances de l'APP (Global)
 # Celles-ci sont pour ton code main.py
 COPY requirements.txt .
