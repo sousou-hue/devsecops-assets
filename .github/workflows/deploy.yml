@@ -112,6 +112,7 @@ jobs:
             sudo docker rm devsecops-app || true
             sudo docker run -d -p 80:80 --name devsecops-app ${{ secrets.DOCKER_USERNAME }}/devsecops-assets:latest
 
+      # 🚨 CAS D'ÉCHEC
       - name: 🔴 Email Échec Déploiement
         if: failure() && steps.deploy_ssh.outcome == 'failure'
         uses: dawidd6/action-send-mail@v3
@@ -124,4 +125,26 @@ jobs:
           to: soumiaeliraoui2003@gmail.com
           from: DevSecOps Bot <eliraouisoumia2003@gmail.com>
           body: "Impossible de contacter le serveur EC2."
-          
+
+      # ✅ CAS DE SUCCÈS (NOUVEAU)
+      - name: ✅ Email Succès Déploiement
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "✅ SUCCÈS : Déploiement Réussi (DevSecOps)"
+          to: soumiaeliraoui2003@gmail.com
+          from: DevSecOps Bot <soumia@gmail.com>
+          body: |
+            Félicitations ! 🚀
+            
+            Le pipeline DevSecOps est passé au vert :
+            1. Secrets : OK (TruffleHog)
+            2. Build Docker : OK
+            3. Scan Vulnérabilités : OK (Trivy)
+            4. Déploiement EC2 : OK
+            
+            La nouvelle version est en ligne sur votre serveur.
