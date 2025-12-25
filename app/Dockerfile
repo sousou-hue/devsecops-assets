@@ -19,10 +19,6 @@ RUN pipx install checkov
 # 3. Installation de PROWLER via pipx (Isolé)
 RUN pipx install prowler
 
-# On installe une vieille version de Django (v2.2)
-# Elle contient des failles "CRITICAL" (CVE) que Trivy VA voir.
-RUN pip install Django==2.2
-
 # 4. Installation des dépendances de l'APP (Global)
 # Celles-ci sont pour ton code main.py
 COPY requirements.txt .
