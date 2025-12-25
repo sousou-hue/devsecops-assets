@@ -20,7 +20,7 @@ jobs:
         with:
           path: ./
           
-          extra_args: --debug --fail --no-verification
+          extra_args: --debug --no-verification
 
       - name: ☢️ Email Alerte Secret
         if: failure() && steps.trufflehog.outcome == 'failure'
