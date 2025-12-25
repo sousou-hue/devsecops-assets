@@ -13,14 +13,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
       - name: TruffleHog Secret Scan
         id: trufflehog
         uses: trufflesecurity/trufflehog@main
         with:
-          path: ./
-          
-          extra_args: --debug --no-verification
+          extra_args: --results=verified,unknown
 
       - name: ☢️ Email Alerte Secret
         if: failure() && steps.trufflehog.outcome == 'failure'
