@@ -19,9 +19,8 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --no-verification
+          
+          extra_args: --debug --fail --no-verification
 
       - name: ☢️ Email Alerte Secret
         if: failure() && steps.trufflehog.outcome == 'failure'
