@@ -121,6 +121,7 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "🔴 ÉCHEC : Déploiement (DevSecOps)"
-          to: eliraouisoumia2003@gmail.com
+          to: soumiaeliraoui2003@gmail.com
           from: DevSecOps Bot <eliraouisoumia2003@gmail.com>
           body: "Impossible de contacter le serveur EC2."
+          
