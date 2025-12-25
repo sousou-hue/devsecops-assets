@@ -15,6 +15,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      # AJOUTE CECI POUR VÉRIFIER
+      - name: Debug - Lister les fichiers
+        run: |
+          ls -R
+          cat File.py || echo "Fichier introuvable"
       - name: TruffleHog Secret Scan
         id: trufflehog
         uses: trufflesecurity/trufflehog@main
