@@ -11,7 +11,7 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# 1. NOUVELLE TABLE DYNAMODB
+# TABLE DYNAMODB
 resource "aws_dynamodb_table" "history_table" {
   name           = "DevSecOpsHistory" # Identique au main.py
   billing_mode   = "PAY_PER_REQUEST"
@@ -22,7 +22,7 @@ resource "aws_dynamodb_table" "history_table" {
   }
 }
 
-# 2. NOUVEAU ROLE IAM
+# ROLE IAM
 resource "aws_iam_role" "ec2_role" {
   name = "DevSecOpsEC2Role" 
   assume_role_policy = jsonencode({
@@ -41,7 +41,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
-# 3. NOUVEAU SECURITY GROUP
+# SECURITY GROUP
 resource "aws_security_group" "app_sg" {
   name = "devsecops-sg"
 
@@ -65,18 +65,18 @@ resource "aws_security_group" "app_sg" {
   }
 }
 
-# 4. NOUVEAU BUCKET S3 (Change ton prénom ici !)
+BUCKET S3 
 resource "aws_s3_bucket" "frontend_bucket" {
-  # 👇 CHANGE CE NOM (Doit être unique)
+  # 
   bucket = "devsecops-assets-front-soumia-wiame-amine" 
   force_destroy = true
 }
 
-# 5. NOUVEAU SERVEUR EC2
+# SERVEUR EC2
 resource "aws_instance" "app_server" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
-  key_name      = "devsecops-key" # La nouvelle clé créée à l'étape 2
+  key_name      = "devsecops-key" 
   
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name

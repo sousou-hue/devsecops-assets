@@ -1,3 +1,4 @@
+
 # Fausse configuration AWS pour test de sécurité
 aws_access_key_id = "AKIAIMNOTREALKEY1234"
 aws_secret_access_key = "WaImNotRealSecretKeyDontUseMeInProd12345"

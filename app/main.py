@@ -11,7 +11,7 @@ from datetime import datetime
 
 app = FastAPI()
 
-# 👇 NOUVEAU NOM DE TABLE
+
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 table = dynamodb.Table('DevSecOpsHistory') 
 
@@ -28,7 +28,7 @@ def clean_ansi_codes(text):
 
 @app.get("/")
 def read_root():
-    # 👇 NOUVEAU MESSAGE
+    
     return {"status": "DevSecOps Assets Cloud est prêt 🛡️"}
 
 @app.get("/history")
